@@ -263,6 +263,8 @@ interpreted according to `defun-declarations-alist'.
 The return value is undefined.
 
 \(fn NAME ARGLIST &optional DOCSTRING DECL &rest BODY)"
+  ;; DNM(Krey): How the hug do i define this only within the macro >.<
+  (setq function-name name)
   ;; We can't just have `decl' as an &optional argument, because we need
   ;; to distinguish
   ;;    (defun foo (arg) (toto) nil)
