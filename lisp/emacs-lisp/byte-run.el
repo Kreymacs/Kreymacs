@@ -252,8 +252,6 @@ The return value is undefined.
 	       (cons 'prog1 (cons def declarations))
 	     def))))))
 
-(defvar function-name nil "Variable defined within the scope of `defun' storing the name of the function")
-
 ;; Now that we defined defmacro we can use it!
 (defmacro defun (name arglist &optional docstring &rest body)
   "Define NAME as a function.
@@ -262,9 +260,11 @@ See also the function `interactive'.
 DECL is a declaration, optional, of the form (declare DECLS...) where
 DECLS is a list of elements of the form (PROP . VALUES).  These are
 interpreted according to `defun-declarations-alist'.
+Variable 'function-name' can be used to reference a function name within the scope of this macro.
 The return value is undefined.
 
-\(fn NAME ARGLIST &optional DOCSTRING DECL &rest BODY)"
+\(fn NAME ARGLIST &optional DOCSTRING DECL &rest BODY)
+"
   ;; NOTICE(Krey): Used to define `function-name'
   (let ((function-name name))
     ;; We can't just have `decl' as an &optional argument, because we need
