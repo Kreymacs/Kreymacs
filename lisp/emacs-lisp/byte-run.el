@@ -264,7 +264,7 @@ The return value is undefined.
 
 \(fn NAME ARGLIST &optional DOCSTRING DECL &rest BODY)"
   ;; DNM(Krey): How the hug do i define this only within the macro >.<
-  (let (function-name name)
+  (let ((function-name name))
     ;; We can't just have `decl' as an &optional argument, because we need
     ;; to distinguish
     ;;    (defun foo (arg) (toto) nil)
