@@ -1,9 +1,19 @@
-name: Build
+name: ConaIsa
 
 # Relevant to events - https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
 on:
   pull_request:
     types: [ opened, reopened, ready_for_review ]
+    paths:
+      - 'GNUmakefile'
+      - 'Makefile.in'
+      - '.github/workflows/ConaIsa.yml'
+      - 'configure.ac'
+      - '**.h'
+      - '**.m'
+      - '**.m4'
+      - '**.c'
+      - '**.el'
 
 jobs:
   build-linux:
@@ -13,11 +23,13 @@ jobs:
       - name: Install dependencies..
         shell: bash
         run: |
+          # By default the debian:stable container doesn't have deb-src which we need to invoke 'apt-get build-deps ...'
           printf '%s\n' \
             "deb http://deb.debian.org/debian stable main" \
             "deb-src http://deb.debian.org/debian stable main" \
           > /etc/apt/sources.list
           apt-get update
+          # Container 'debian:stable' doesn't have git by default
           apt-get install --yes git
           # Get dependencies needed to build emacs
           apt-get build-dep --yes emacs
