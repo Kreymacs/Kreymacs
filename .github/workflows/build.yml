@@ -14,7 +14,7 @@ jobs:
         shell: bash
         run: |
           apt-get update
-          apt-get install git build-essential
+          apt-get install git build-essential --yes
       - name: Pulling git directory..
         uses: actions/checkout@v2
       - name: Building..
