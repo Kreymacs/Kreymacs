@@ -9,11 +9,14 @@ on:
       - 'Makefile.in'
       - '.github/workflows/ConaIsa.yml'
       - 'configure.ac'
+      - '**.c'
+      - '**.cpp'
+      - '**.el'
       - '**.h'
       - '**.m'
       - '**.m4'
-      - '**.c'
-      - '**.el'
+      - '**.sh'
+      - '**.texi'
 
 jobs:
   build-linux:
