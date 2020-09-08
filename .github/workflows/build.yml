@@ -13,11 +13,11 @@ jobs:
       - name: Install dependencies..
         shell: bash
         run: |
+          pritnf "%s http://deb.debian.org/debian stable main" "deb" "deb-src" > /etc/apt/sources.list
           apt-get update
-          apt-get install --yes \
-            git \
-            build-essential \
-            autoconf
+          apt-get install --yes git
+          # Get dependencies needed to build emacs
+          apt-get build-dep emacs
       - name: Pulling git directory..
         uses: actions/checkout@v2
       - name: Building..
