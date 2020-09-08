@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-linux:
-    runs-one: ubuntu-latest
+    runs-as: ubuntu-latest
     container: debian:stable
     steps:
       - name: Pulling git dir..
