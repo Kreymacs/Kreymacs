@@ -10,7 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     container: debian:stable
     steps:
-      - name: Pulling git dir..
+      - name: Install dependencies..
+        shell: bash
+        run: |
+          apt-get update
+          apt-get install git build-esential
+      - name: Pulling git directory..
         uses: actions/checkout@v2
       - name: Building..
         shell: bash
