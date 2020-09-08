@@ -13,7 +13,10 @@ jobs:
       - name: Install dependencies..
         shell: bash
         run: |
-          printf "%s http://deb.debian.org/debian stable main" "deb" "deb-src" > /etc/apt/sources.list
+          printf '%s\n' \
+            "deb http://deb.debian.org/debian stable main" \
+            "deb-src http://deb.debian.org/debian stable main" \
+          > /etc/apt/sources.list
           apt-get update
           apt-get install --yes git
           # Get dependencies needed to build emacs
