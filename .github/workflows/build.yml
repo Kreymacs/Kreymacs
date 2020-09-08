@@ -14,7 +14,10 @@ jobs:
         shell: bash
         run: |
           apt-get update
-          apt-get install git build-essential --yes
+          apt-get install --yes \
+            git \
+            build-essential \
+            autoconf
       - name: Pulling git directory..
         uses: actions/checkout@v2
       - name: Building..
