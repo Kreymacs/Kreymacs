@@ -1,0 +1,30 @@
+name: Build
+
+# Relevant to events - https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
+on:
+  pull_request:
+    types: [ opened, reopened, ready_for_review ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    container: debian:stable
+    steps:
+      - name: Install dependencies..
+        shell: bash
+        run: |
+          printf '%s\n' \
+            "deb http://deb.debian.org/debian stable main" \
+            "deb-src http://deb.debian.org/debian stable main" \
+          > /etc/apt/sources.list
+          apt-get update
+          apt-get install --yes git
+          # Get dependencies needed to build emacs
+          apt-get build-dep --yes emacs
+      - name: Pulling git directory..
+        uses: actions/checkout@v2
+      - name: Building..
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          make all
