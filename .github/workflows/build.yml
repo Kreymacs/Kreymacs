@@ -1,0 +1,21 @@
+ame: Build
+
+# Relevant to events - https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
+on:
+  pull_request:
+    branches:
+      - master
+    types: [ opened, reopened, ready_for_review ]
+
+jobs:
+  build-linux:
+    runs-one: ubuntu-latest
+    container: debian:stable
+    steps:
+      - name: Pulling git dir..
+        uses: actions/checkout@v2
+      - name: Building..
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          make all
