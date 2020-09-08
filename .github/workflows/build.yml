@@ -20,7 +20,7 @@ jobs:
           apt-get update
           apt-get install --yes git
           # Get dependencies needed to build emacs
-          apt-get build-dep emacs
+          apt-get build-dep --yes emacs
       - name: Pulling git directory..
         uses: actions/checkout@v2
       - name: Building..
