@@ -3,7 +3,7 @@ name: Shell
 # Relevant to events - https://help.github.com/en/actions/automating-your-workflow-with-github-actions/events-that-trigger-workflows
 on: 
   pull_request:
-    types: [synchronize, opened, reopened, ready_for_review]
+    types: [ opened, reopened, ready_for_review ]
     paths:
     - '**.sh'
 
