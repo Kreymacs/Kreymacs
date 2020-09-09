@@ -1,32 +1,46 @@
-#!/bin/sh
-### autogen.sh - tool to help build Emacs from a repository checkout
+hellcheck shell=sh # Written to be POSIX compatible
 
-## Copyright (C) 2011-2020 Free Software Foundation, Inc.
+# Created by Glenn Morris identified using an electronic mail <rgm@gnu.org> under Copyright (C) 2011-2020 of Free Software Foundation <https://www.fsf.org/> licensed as of 08/09/2020-EU 21:46:11 CEST under GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.en.html>
+# Refactored by Jacob Hrbek identified using an electronic mail <kreyren@rixotstudio.cz> and GPG identifier 0x765AED304211C28410D5C478FCBA0482B0AB9F10 in 08/09/2020-EU 21:38:39 CEST under GPLv3 license <https://www.gnu.org/licenses/gpl-3.0.en.html>
 
-## Author: Glenn Morris <rgm@gnu.org>
-## Maintainer: emacs-devel@gnu.org
+###! autogen.sh
+###! *Script tool to help build Emacs from a repository checkout*
 
-## This file is part of GNU Emacs.
+###! ### Depencencies:
+###! - autoconf[=???] - FIXME-DOCS
 
-## GNU Emacs is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+###! ### Additional informations
+###! - The Emacs repository does not include the configure script (and associated helpers). The first time you fetch Emacs from the repo, run this script to generate the necessary files. For more details, see the file INSTALL.REPO.
 
-## GNU Emacs is distributed in the hope that it will be useful,
-## but WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+###! ### Copyright notice
+###! This file is part of GNU Emacs <https://www.gnu.org/software/emacs/> which is is free software: you can redistribute it and/or modify it under the terms of the GPLv3 License <https://www.gnu.org/licenses/gpl-3.0.en.html>
 
-## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
+# Maintainer info
+MAINTAINER_NAME="Glenn"
+MAINTAINER_SURNAME="Morris"
+MAINTAINER_EMAIL="emacs-devel@gnu.org"
+MAINTAINER_GPG_KEY=
 
-### Commentary:
+set -e
 
-## The Emacs repository does not include the configure script (and
-## associated helpers).  The first time you fetch Emacs from the repo,
-## run this script to generate the necessary files.
-## For more details, see the file INSTALL.REPO.
+# Command overrides
+CAT=cat
+
+
+
+# Argument resolution
+while [ "$#" -gt 0 ]; do case "$1" in
+	--help)
+		"$CAT" <<-EOF
+			FIXME-DOCS: Help message
+		EOF
+	;;
+	*)
+		# DNM
+		exit 2
+esac; done
+
+# ---
 
 ### Code:
 
@@ -35,7 +49,7 @@
 progs="autoconf"
 
 ## Minimum versions we need:
-autoconf_min=`sed -n 's/^ *AC_PREREQ(\([0-9\.]*\)).*/\1/p' configure.ac`
+autoconf_min="$(sed -n 's/^ *AC_PREREQ(\([0-9\.]*\)).*/\1/p' configure.ac)"
 
 
 ## $1 = program, eg "autoconf".
@@ -43,10 +57,11 @@ autoconf_min=`sed -n 's/^ *AC_PREREQ(\([0-9\.]*\)).*/\1/p' configure.ac`
 ## FIXME does not handle things like "1.4a", but AFAIK those are
 ## all old versions, so it is OK to fail there.
 ## Also note that we do not handle micro versions.
-get_version ()
-{
-    vers=`($1 --version) 2> /dev/null` && expr "$vers" : '[^
-]* \([0-9][0-9.]*\).*'
+get_version () {
+	case "$("$1" --version 2>/dev/null)" in
+		*[0-9][0-9]*) return 0 ;;
+		*) return 1
+	esac
 }
 
 ## $1 = version string, eg "2.59"
