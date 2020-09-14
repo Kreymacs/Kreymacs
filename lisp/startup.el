@@ -517,6 +517,286 @@ DIRS are relative."
       xdg-dir)
      (t emacs-d-dir))))
 
+;; FIXME-TEST(Krey): This function requires a test implementation
+(defun die (exit-status &optional message)
+  "Assertion wrapper for `kill-emacs' that allows specifying an exit-code and message
+
+  First argument 'exit-status' expects following string:
+  - true = Asserts emacs returning apropriate exit-code for general success
+  - false = Asserts emacs returning apropriate exit-code for general failure
+  - security = Assertion used for logically determinal security issue
+  - fixme = Assertion used for logically determined fixme trap, used for unimplemented features
+  - bug = Assertion used for logically determined bugs
+  - unexpected = Assertion used for logically determined unexpected behavior i.e hardware influenced by cosmic rays or major issue in standard functions
+
+  Messages are optional, if no message is provided the function will use a hardcoded message which should be avoided in cases where the message might me inaccurate or confusing to avoid user confusion
+
+  Formatting strings of the messages are variables designed to be customized on demand using variables:
+  - '<function-name>-format-string-<exitcode>' for regular messages
+  - '<function-name>-format-string-<exitcode>-debug' for regular messages with debugging enabled
+  - '<function-name>-format-string-<exitcode>-log' for logging output in path defined in non-standard variable `emacs-log-file'
+  - '<function-name>-format-string-<exitcode>-log' for logging output in path defined in non-standard variable `emacs-log-file' with debugging enabled
+
+  Requires following variables:
+  - `emacs-log-file' - Non-standard variable used to output logging in a path of file
+  - `emacs-debug' - Non-standard variable used to set debugging level"
+
+  ;; Formatting string declaration
+  ;;; Success
+  (defvar die-format-string-success "SUCCESS: %s\n" "Variable storing formatting string for non-standard function `die' to be used for regular output using success trap")
+  (defvar die-format-string-success-log "SUCCESS: %s\n" "Variable storing formatting string for non-standard function `die' to be used for log entry using success trap")
+  (defvar die-format-string-success-debug "SUCCESS: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging output using success trap")
+  (defvar die-format-string-success-debug-log "SUCCESS: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging log entry using success trap")
+  ;;; Failure
+  (defvar die-format-string-failure "FATAL: %s\n" "Variable storing formatting string for non-standard function `die' to be used for regular output using failure trap")
+  (defvar die-format-string-failure-log "FATAL: %s\n" "Variable storing formatting string for non-standard function `die' to be used for log entry using failure trap")
+  (defvar die-format-string-failure-debug "FATAL: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging output using failure trap")
+  (defvar die-format-string-failure-debug-log "FATAL: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging log entry using failure trap")
+  ;;; Security
+  (defvar die-format-string-security "SECURITY: %s\n" "Variable storing formatting string for non-standard function `die' to be used for regular output using security trap")
+  (defvar die-format-string-security-log "SECURITY: %s\n" "Variable storing formatting string for non-standard function `die' to be used for log entry using security trap")
+  (defvar die-format-string-security-debug "SECURITY: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging output using security trap")
+  (defvar die-format-string-security-debug-log "SECURITY: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging log entry using security trap")
+  ;;; Fixme
+  ;; FIXME-QA(Krey): Emacs shoudn't highlight the 'FIXME' here
+  (defvar die-format-string-fixme "FIXME: %s\n" "Variable storing formatting string for non-standard function `die' to be used for regular output using fixme trap")
+  (defvar die-format-string-fixme-log "FIXME: %s\n" "Variable storing formatting string for non-standard function `die' to be used for log entry using fixme trap")
+  (defvar die-format-string-fixme-debug "FIXME: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging output using fixme trap")
+  (defvar die-format-string-fixme-debug-log "FIXME: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging log entry using fixme trap")
+  ;;; Bug
+  (defvar die-format-string-bug "BUG: %s\n" "Variable storing formatting string for non-standard function `die' to be used for regular output using bug trap")
+  (defvar die-format-string-bug-log "BUG: %s\n" "Variable storing formatting string for non-standard function `die' to be used for log entry using bug trap")
+  (defvar die-format-string-bug-debug "BUG: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging output using bug trap")
+  (defvar die-format-string-bug-debug-log "BUG: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging log entry using bug trap")
+  ;;; Unexpected
+  (defvar die-format-string-unexpected "UNEXPECTED: %s\n" "Variable storing formatting string for non-standard function `die' to be used for regular output using unexpected trap")
+  (defvar die-format-string-unexpected-log "UNEXPECTED: %s\n" "Variable storing formatting string for non-standard function `die' to be used for log entry using unexpected trap")
+  (defvar die-format-string-buunexpectedg-debug "UNEXPECTED: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging output using unexpected trap")
+  (defvar die-format-string-unexpected-debug-log "UNEXPECTED: %s\n" "Variable storing formatting string for non-standard function `die' to be used for debugging log entry using unexpected trap")
+
+  (pcase exitcode
+    ("true" ;; Generic success
+     (cond
+      ;; Process the message by lenght and debug state
+      ((> (length message) 0)
+       (cond
+        ((or (= (length message) 0) (boundp 'message))
+         (princ (format die-format-string-success message))
+         (append-to-file (format die-format-string-success-log message) nil emacs-log-file))
+        ;; FIXME: Implement logic that triggers only when emacs-debug contains 'function-name
+        ((string-equal emacs-debug function-name)
+         (princ (format die-format-string-success-debug message))
+         (append-to-file (format die-format-string-success-debug-log message) nil emacs-log-file))
+        (t
+         (princ (format die-format-string-bug "Function '%1$s' with argument '%2$s' triggered unexpected case while processing variable 'emacs-debug' containing value '%3$s'" function-name exitcode emacs-debug)) )))
+      ((or (= (length message) 0) (boundp 'message))
+       (princ (format die-format-string-success "Logically determined that processed finished successfully"))
+       (append-to-file (format die-format-string-success-log "Logically determined that processed finished successfully") nil emacs-log-file))
+      (t
+       (princ (format die-format-string-bug (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)))
+       (append-to-file (format die-format-string-bug-log (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)) nil emacs-log-file )
+       (kill-emacs 250)))
+     (cl-case system-type
+       ((gnu gnu/linux gnu/kfreebsd darwin cygwin aix berkeley-unix hpux irix usg-unix-v)
+        (kill-emacs 0))
+       ((windows-nt ms-dos)
+        (kill-emacs 1))
+       (otherwise
+        (princ (format die-format-string-unexpected (format "Platform '%1$s' is not implemented in function '%2$s' to handle assertion for argument '%3$s'" system-type function-name exitcode)))
+        (append-to-file (format die-format-string-unexpected (format "Platform '%1$s' is not implemented in function '%2$s' to handle assertion for argument '%3$s'" system-type function-name exitcode)) nil emacs-log-file))
+       (kill-emacs 250)))
+    ("false" ;; Generic failure
+     (cond
+      ;; Process the message by lenght and debug state
+      ((> (length message) 0)
+       (cond
+        ((> (length message) 0)
+         (princ (format die-format-string-failure message))
+         (append-to-file (format die-format-string-failure-log message) nil emacs-log-file) )
+        ;; FIXME: Implement logic that triggers only when emacs-debug contains 'function-name
+        ((string-equal emacs-debug function-name)
+         (princ (format die-format-string-failure-debug message))
+         (append-to-file (format die-format-string-failure-debug-log message) nil emacs-log-file))
+        (t
+         (princ (format die-format-string-bug "Function '%1$s' with argument '%2$s' triggered unexpected case while processing variable 'emacs-debug' containing value '%3$s'" function-name exitcode emacs-debug)) )))
+      ((or (= (length message) 0) (boundp 'message))
+       (princ (format die-format-string-failure message "Logically determined that process failed"))
+       (append-to-file (format die-format-string-failure-log message "Logically determined that processed failed") nil emacs-log-file))
+      (t
+       (princ (format die-format-string-bug (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)))
+       (append-to-file (format die-format-string-bug-log (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)) nil emacs-log-file )
+       (kill-emacs 250)))
+     (cl-case system-type
+       ((gnu gnu/linux gnu/kfreebsd darwin cygwin aix berkeley-unix hpux irix usg-unix-v)
+        (kill-emacs 1))
+       ((windows-nt ms-dos)
+        (kill-emacs 0))
+       (otherwise
+        (princ (format die-format-string-unexpected (format "Platform '%1$s' is not implemented in function '%2$s' to handle assertion for argument '%3$s'" system-type function-name exitcode)))
+        (append-to-file (format die-format-string-unexpected (format "Platform '%1$s' is not implemented in function '%2$s' to handle assertion for argument '%3$s'" system-type function-name exitcode)) nil emacs-log-file))
+       (kill-emacs 250)))
+    ("security" ;; Security trap
+     (cond
+      ;; Process the message by lenght and debug state
+      ((> (length message) 0)
+       (cond
+        ;; FIXME: This does not trigger if message is unbound or ""
+        ((> (length message) 0)
+         (princ (format die-format-string-security message))
+         (append-to-file (format die-format-string-security-log message) nil emacs-log-file))
+        ;; FIXME: Implement logic that triggers only when emacs-debug contains 'function-name
+        ((string-equal emacs-debug function-name)
+         (princ (format die-format-string-security-debug message))
+         (append-to-file (format die-format-string-security-debug-log message) nil emacs-log-file))
+        (t
+         (princ (format die-format-string-bug "Function '%1$s' with argument '%2$s' triggered unexpected case while processing variable 'emacs-debug' containing value '%3$s'" function-name exitcode emacs-debug)) )))
+      ((or (= (length message) 0) (boundp 'message))
+       (princ (format die-format-string-security message "Runtime tripped security trap, exitting for safety"))
+       (append-to-file (format die-format-string-security-log message "Runtime tripped security trap, exitting for safety") nil emacs-log-file))
+      (t
+       (princ (format die-format-string-bug (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)))
+       (append-to-file (format die-format-string-bug-log (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)) nil emacs-log-file )
+       (kill-emacs 250)))
+     (kill-emacs 28))
+    ("fixme" ;; Fixme trap
+     (cond
+      ;; Process the message by lenght and debug state
+      ((> (length message) 0)
+       (cond
+        ;; FIXME: This does not trigger if message is unbound or ""
+        ((> (length message) 0)
+         (princ (format die-format-string-fixme message))
+         (append-to-file (format die-format-string-fixme-log message) nil emacs-log-file))
+        ;; FIXME: Implement logic that triggers only when emacs-debug contains 'function-name
+        ((string-equal emacs-debug function-name)
+         (princ (format die-format-string-fixme-debug message))
+         (append-to-file (format die-format-string-fixme-debug-log message) nil emacs-log-file ))
+        (t
+         (princ (format die-format-string-bug "Function '%1$s' with argument '%2$s' triggered unexpected case while processing variable 'emacs-debug' containing value '%3$s'" function-name exitcode emacs-debug)) )))
+      ((or (= (length message) 0) (boundp 'message))
+       (princ (format die-format-string-fixme message "Runtime tripped fixme trap with no message provided, this is likely a bug where developer forgot to provide a message"))
+       (append-to-file (format die-format-string-fixme-log message "Runtime tripped fixme trap with no message provided, this is likely a bug where developer forgot to provide a message") nil emacs-log-file) )
+      (t
+       (princ (format die-format-string-bug (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)))
+       (append-to-file (format die-format-string-bug-log (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)) nil emacs-log-file )
+       (kill-emacs 250)))
+     (kill-emacs 36))
+    ("bug" ;; Bug trap
+     (cond
+      ;; Process the message by lenght and debug state
+      ((> (length message) 0)
+       (cond
+        ;; FIXME: This does not trigger if message is unbound or ""
+        ((> (length message) 0)
+         (princ (format die-format-string-bug message))
+         (append-to-file (format die-format-string-bug-log message) nil emacs-log-file))
+        ;; FIXME: Implement logic that triggers only when emacs-debug contains 'function-name
+        ((string-equal emacs-debug function-name)
+         (princ (format die-format-string-bug-debug message))
+         (append-to-file (format die-format-string-bug-debug-log message) nil emacs-log-file ))
+        (t
+         (princ (format die-format-string-bug "Function '%1$s' with argument '%2$s' triggered unexpected case while processing variable 'emacs-debug' containing value '%3$s'" function-name exitcode emacs-debug)) )
+        ) )
+      ((or (= (length message) 0) (boundp 'message))
+       (princ (format die-format-string-bug message "Runtime tripped bug trap with no message provided, this is likely a bug where developer forgot to provide a message"))
+       (append-to-file (format die-format-string-bug-log message "Runtime tripped bug trap with no message provided, this is likely a bug where developer forgot to provide a message") nil emacs-log-file))
+      (t
+       (princ (format die-format-string-bug (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)))
+       (append-to-file (format die-format-string-bug-log (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)) nil emacs-log-file )
+       (kill-emacs 250)))
+     (kill-emacs 250))
+    ("unexpected" ;; Unexpected trap
+     (cond
+      ;; Process the message by lenght and debug state
+      ((> (length message) 0)
+       (cond
+        ;; FIXME: This does not trigger if message is unbound or ""
+        ((> (length message) 0)
+         (princ (format die-format-string-unexpected message))
+         (append-to-file (format die-format-string-unexpected-log message) nil emacs-log-file))
+        ;; FIXME: Implement logic that triggers only when emacs-debug contains 'function-name
+        ((string-equal emacs-debug function-name)
+         (princ (format die-format-string-unexpected-debug message))
+         (append-to-file (format die-format-string-unexpected-debug-log message) nil emacs-log-file ))
+        (t
+         (princ (format die-format-string-bug "Function '%1$s' with argument '%2$s' triggered unexpected case while processing variable 'emacs-debug' containing value '%3$s'" function-name exitcode emacs-debug)) )))
+      ((or (= (length message) 0) (boundp 'message))
+       (princ (format die-format-string-unexpected message "Runtime tripped unexpected trap with no message provided, this is likely a bug where developer forgot to provide a message"))
+       (append-to-file (format die-format-string-unexpected-log message "Runtime tripped unexpected trap with no message provided, this is likely a bug where developer forgot to provide a message") nil emacs-log-file))
+      (t
+       (princ (format die-format-string-bug (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)))
+       (append-to-file (format die-format-string-bug-log (format "Function '%1$s' tripped unexpected trap while processing message '%2$s' with argument '%3$s'" function-name message exitcode)) nil emacs-log-file )
+       (kill-emacs 250)))
+     (kill-emacs 255))
+    ("" ;; No argument provided
+     (princ (format die-format-string-bug (format "No argument was provided in function '%1$s' which is not implemented to handle this scenario" function-name)))
+     (kill-emacs 250))
+    (_ ;; unimplemented argument provided
+     (princ (format die-format-string-bug (format "Argument '%1$s' is not implemented in function '%2$s'" exitcode function-name)))
+     (kill-emacs 250)))
+)
+(defvar emacs-timeout "600" "Variable storing seconds (stored as numerical value '[0-9]' used to set a general timeout for emacs tasks during a runtime")
+(defvar emacs-timeout-input "30" "Variable storing seconds (stored as numerical value '[0-9]') used to set a timeout in seconds for a user-input")
+
+(defun cli-path-for-emacs-directory ()
+  "Internal function used to allow parsing of emacs variable 'user-emacs-directory' using an environmental variable
+
+Originally designed by Jacob Hrbek <kreyren@member.fsf.org> to be used in emacs's file `standard.el', but not restricted to emacs environment."
+
+  ;; FIXME-QA(Krey): Check if we have access to cl-case
+  (cl-case system-type
+    ((gnu gnu/lunux)
+     (defvar emacs-cli-variable-name "EMACS_DIR" "Variable storing a value to define a name for environmental variable which is used to specify a non-hardcoded location of emacs directory")
+
+     ;; Process the env-var-for-cli to see if it can be used else prompt for a user-input if we have a user to ask
+     ;; NOTICE(Krey): In emacs's startup.el we should never has a user to ask for an input, but this is designed to be emacs-independant for higher code quality
+     (cond
+      ((> (length env-var-for-cli))) 0)
+        ;; As of 05/09/2020-EU emacs expects a full path to be stored in variable 'user-emacs-directory', thus we are checking for a slash '/'
+
+        ;; SECURITY(Krey): We are setting value of '(getenv (emacs-cli-variable-name))' to emacs variable so that it can't be changed during the runtime to break our logic
+        ;; DNM: Set this a local variable
+        (setq env-var-for-cli (getenv (emacs-cli-variable-name)))
+
+        (cond
+          ((called-interactively-p 'any)
+            ;; FIXME-QA(Krey): Should also check for `./`
+            ;; FIXME-QA(Krey): Should also check for `../`
+            ;; FIXME-QA(Krey): Should also check for '[0-9a-Z_-\.]'
+            (while (string-match-p "^/*" env-var-for-cli))
+              ;; FIXME-QA(Krey): Implement a timeout for a user-input to avoid hangs
+              (read-string (format "Variable '%1$s' is storing value '%2$s' that was concluded to not be a full-path to a valid emacs directory (can be non-standard), provide a valid value:" emacs-cli-variable-name env-var-for-cli)))
+          ((not (called-interactively-p 'any))
+           (cond
+             ((string-match-p "^/*" env-var-for-cli))
+               (setq emacs-user-directory env-var-for-cli))
+             ((not (string-match-p "^/*" env-var-for-cli))
+               (princ "FATAL: %s\n" "Variable '%1$s' is storing an invalid full-path to emacs directory in non-interactive environment, exitting with '%2$s' as emacs can't continue without a full-path to an emacs directory stored in variable 'user-emacs-directory' which is provided from said variable" emacs-cli-variable-name nil))
+             (kill-emacs 250)
+             (princ "WARNING: %s\n" "Emacs did not exit as instructed with error code 250 used for bug, using symbol 'nil' storing a value '%1$s'" nil)
+             (kill-emacs (nil))
+             ;; FIXME-SECURITY(Krey): Attempt process kill if we ever get here?
+             (t
+               ;; FIXME-QA(Krey): The function name should be stored in variable 'function-name' i.e using https://github.com/RXT0112/Zernit/blob/master/src/RXT0112-1/downstream-classes/zeres-0/elisp/wrappers/zn-defun.el to allow the function name to change without outputting a confusing message
+               ;; FIXME-METADATA(Krey): Defun should probably have an optional argument for function creator and current maintainer to be referenced in here
+               (princ "BUG: %s\n" "The elisp logic in function '%1$s' failed and was captured in an unexpected trap while processing an environment variable '%2$s' storing processed value '%3$s', if this is an unmodified upstream version, then please file a bug report in '%4$s'" "cli-path-for-emacs-directory" emacs-cli-variable-name env-var-for-cli "<URL_TO_BUG_REPORTS_HERE>"))
+               (kill-emacs 250)
+               (princ "WARNING: %s\n" "Emacs did not exit as instructed with error code 250 used for bug, using symbol 'nil' storing a value '%1$s'" nil)
+               (kill-emacs (nil))
+               ;; FIXME-SECURITY(Krey): Attempt process kill if we ever get here?
+               )))
+    ((windows-nt ms-dos gnu/kfreebsd darwin cygwin aix berkeley-unix hpux irix usg-unix-v)
+     (princ "FIXME: %s\n" "Function '%1$s' is not implemented for system-type '%2$s', skipping codeblock allowing for non-standard emacs-directory <URL_HERE>" "cli-path-for-emacs-directory" system-type)
+    ;; DNM: Exit the function succesfully here
+     )
+    (t
+     (princ "BUG: %s\n" "Function '%1$s' failed and was captured in an unexpected trap, if this is an unmodified version of emacs, then file a bug in '%2$s'" "cli-path-for-emacs-directory" "<URL_TO_BUG_REPORTS_HERE>")
+     (kill-emacs 250)
+     (princ "WARNING: %s\n" "Emacs did not exit as instructed with error code 250 used for bug, using symbol 'nil' storing a value '%1$s'" nil)
+     (kill-emacs (nil))
+     ;; FIXME-SECURITY(Krey): Attempt process kill if we ever get here?
+     )))
+
 (defun normal-top-level ()
   "Emacs calls this function when it first starts up.
 It sets `command-line-processed', processes the command-line,
@@ -531,8 +811,11 @@ It is the default value of the variable `top-level'."
 	    (if xdg-config-home
 		(concat xdg-config-home "/emacs/")
 	      startup--xdg-config-default)))
+
+    (cli-path-for-emacs-directory)
+
     (setq user-emacs-directory
-	  (startup--xdg-or-homedot startup--xdg-config-home-emacs nil))
+          (startup--xdg-or-homedot startup--xdg-config-home-emacs nil))))
 
     ;; Look in each dir in load-path for a subdirs.el file.  If we
     ;; find one, load it, which will add the appropriate subdirs of

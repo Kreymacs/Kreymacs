@@ -1,3 +1,75 @@
+# Generated using: grep -oP "^[a-zA-Z-]+\:.*" Makefile | sed s/:.*// | grep -v PHONY | tr '\n' ' '
+PHONY:
+
+# Metadata
+NAME ?= Kreymacs
+VERSION = 0.0.0
+
+# Command overrides
+## These are used to support non-standard system configuration through exporting environment variables
+EXIT ?= exit
+PRINTF ?= printf
+MKDIR ?= mkdir
+
+# Directory overrides
+BUILDDIR ?= "$(PWD)/build"
+INSTAL ?= whatever
+
+#@ Default target invoked on 'make' (outputs syntax error on this project)
+all:
+	@ "$(PRINTF)" '%s\n' "Target 'all' is not allowed, use 'make list' to list available targets or read the 'Makefile' file"
+	@ "$(EXIT)" 2 # Syntax error exit
+
+#@ List all targets
+list:
+	@ "$(PRINTF)" 'FIXME: %s\n' "Puts ': something' in the output, implement in a way that is comforming posix"
+	@ "$(TRUE)" \
+		&& "$(GREP)" -A 1 "^#@.*" Makefile | "$(SED)" s/--//gm | "$(SED)" "s/#@/#/gm" | while IFS= "$(READ)" -r line; do \
+			case "$$line" in \
+				"#"*|"") "$(PRINTF)" '%s\n' "$$line" ;; \
+				*) "$(PRINTF)" '%s\n' "make $$line"; \
+			esac; \
+		done
+
+#@ Output a help message
+help:
+	@ "$(PRINTF)" '%s\n' \
+		"NOTE:  This is a brief summary of some common make targets." \
+		"For more detailed information, please read the files INSTALL," \
+		"INSTALL.REPO, Makefile or visit this URL:" \
+		"https://www.gnu.org/prep/standards/html_node/Standard-Targets.html" \
+		"" \
+		"make build            -- compile and build $(NAME)" \
+		"make install          -- install Emacs to the location specified by TARGETDIR variable" \
+		"make TAGS             -- update tags tables" \
+		"make clean            -- delete built files but preserve configuration" \
+		"make mostlyclean      -- like 'make clean', but leave those files that" \
+		"                         usually do not need to be recompiled" \
+		"make distclean        -- delete all build and configuration files," \
+		"                         leave only files included in source distribution" \
+		"make maintainer-clean -- delete almost everything that can be regenerated" \
+		"make bootstrap        -- delete all compiled files to force a new bootstrap" \
+		"                         from a clean slate, then build in the normal way" \
+		"make uninstall        -- remove files installed by 'make install'" \
+		"make check            -- run the Emacs test suite" \
+		"make docs             -- generate Emacs documentation in info format" \
+		"make html             -- generate documentation in html format" \
+		"make ps               -- generate documentation in ps format" \
+		"make pdf              -- generate documentation in pdf format "
+	@ "$(EXIT)" 0
+
+
+#@ Clean the temporary files
+clean:
+	@ [ ! -d "$(BUILDDIR)" ] || "$(RM)" -r "$(BUILDDIR)"
+
+#@ Buiold the project
+build:
+	@ [ -d "$(BUILDDIR)" ] || "$(MKDIR)" "$(BUILDDIR)"
+
+
+# ---
+
 # Build Emacs from a fresh tarball or version-control checkout.
 
 # Copyright (C) 2011-2020 Free Software Foundation, Inc.
@@ -32,33 +104,35 @@
 # But run 'autogen.sh' first, if the source was checked out directly
 # from the repository.
 
+
 # Display help.
 
 ifeq (help,$(filter help,$(MAKECMDGOALS)))
 help:
-	@echo "NOTE:  This is a brief summary of some common make targets."
-	@echo "For more detailed information, please read the files INSTALL,"
-	@echo "INSTALL.REPO, Makefile or visit this URL:"
-	@echo "https://www.gnu.org/prep/standards/html_node/Standard-Targets.html"
-	@echo ""
-	@echo "make all              -- compile and build Emacs"
-	@echo "make install          -- install Emacs"
-	@echo "make TAGS             -- update tags tables"
-	@echo "make clean            -- delete built files but preserve configuration"
-	@echo "make mostlyclean      -- like 'make clean', but leave those files that"
-	@echo "                         usually do not need to be recompiled"
-	@echo "make distclean        -- delete all build and configuration files,"
-	@echo "                         leave only files included in source distribution"
-	@echo "make maintainer-clean -- delete almost everything that can be regenerated"
-	@echo "make bootstrap        -- delete all compiled files to force a new bootstrap"
-	@echo "                         from a clean slate, then build in the normal way"
-	@echo "make uninstall        -- remove files installed by 'make install'"
-	@echo "make check            -- run the Emacs test suite"
-	@echo "make docs             -- generate Emacs documentation in info format"
-	@echo "make html             -- generate documentation in html format"
-	@echo "make ps               -- generate documentation in ps format"
-	@echo "make pdf              -- generate documentation in pdf format "
-	@exit
+	@ "$(PRINTF)" '%s\n' \
+		"NOTE:  This is a brief summary of some common make targets." \
+		"For more detailed information, please read the files INSTALL," \
+		"INSTALL.REPO, Makefile or visit this URL:" \
+		"https://www.gnu.org/prep/standards/html_node/Standard-Targets.html" \
+		"" \
+		"make all              -- compile and build Emacs" \
+		"make install          -- install Emacs" \
+		"make TAGS             -- update tags tables" \
+		"make clean            -- delete built files but preserve configuration" \
+		"make mostlyclean      -- like 'make clean', but leave those files that" \
+		"                         usually do not need to be recompiled" \
+		"make distclean        -- delete all build and configuration files," \
+		"                         leave only files included in source distribution" \
+		"make maintainer-clean -- delete almost everything that can be regenerated" \
+		"make bootstrap        -- delete all compiled files to force a new bootstrap" \
+		"                         from a clean slate, then build in the normal way" \
+		"make uninstall        -- remove files installed by 'make install'" \
+		"make check            -- run the Emacs test suite" \
+		"make docs             -- generate Emacs documentation in info format" \
+		"make html             -- generate documentation in html format" \
+		"make ps               -- generate documentation in ps format" \
+		"make pdf              -- generate documentation in pdf format "
+	@ "$(EXIT)" 0
 
 .PHONY: help
 
@@ -95,16 +169,18 @@ default $(ORDINARY_GOALS): Makefile
 .NOTPARALLEL:
 
 configure:
-	@echo >&2 'There seems to be no "configure" file in this directory.'
-	@echo >&2 Running ./autogen.sh ...
+	@ "$(PRINTF)" '%s\n' \
+
+	@ echo >&2 'There seems to be no "configure" file in this directory.'
+	@ echo >&2 Running ./autogen.sh ...
 	./autogen.sh
-	@echo >&2 '"configure" file built.'
+	@ echo >&2 '"configure" file built.'
 
 Makefile: configure
-	@echo >&2 'There seems to be no Makefile in this directory.'
-	@echo >&2 'Running ./configure ...'
+	@ echo >&2 'There seems to be no Makefile in this directory.'
+	@ echo >&2 'Running ./configure ...'
 	./configure
-	@echo >&2 'Makefile built.'
+	@ echo >&2 'Makefile built.'
 
 # 'make bootstrap' in a fresh checkout needn't run 'configure' twice.
 bootstrap: Makefile
